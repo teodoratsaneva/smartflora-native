@@ -7,14 +7,18 @@ export type CareRecord = {
 
 export type Plant = {
   id: number;
-  commonName: string;
-  scientificName?: string;
-  imageUrl?: string;
+  name: string;
+  variety: string;
+  imageUri?: string;
   createdAt: number;
-  idealJson?: string;
-  careHistory: CareRecord[];
-  lastAiScore?: number;
-  lastAiStatus?: string;
-  lastAiAdvice?: string;
-  lastAiTimestamp?: number;
+  idealTemp: number;
+  idealHumidity: number;
+  history: CareRecord[];
+};
+
+export type AiAnalysis = {
+  score: number;
+  status: string;
+  analysis: string;
+  recommendation: string;
 };

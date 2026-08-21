@@ -1,4 +1,4 @@
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import type { RootStackParamList } from './types';
 import { LoginScreen } from '../screens/profile/LoginScreen';
@@ -11,23 +11,21 @@ import { colors } from '../theme/colors';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
+const navTheme = {
+  ...DarkTheme,
+  colors: { ...DarkTheme.colors, background: colors.background },
+};
+
 export function RootNavigator() {
   return (
-    <NavigationContainer>
-      <Stack.Navigator
-        initialRouteName="Login"
-        screenOptions={{
-          headerStyle: { backgroundColor: colors.primary },
-          headerTintColor: '#fff',
-          headerTitleStyle: { fontWeight: '600' },
-        }}
-      >
-        <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="Register" component={RegisterScreen} options={{ title: 'Регистрация' }} />
-        <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'SmartFlora', headerBackVisible: false }} />
-        <Stack.Screen name="AddPlant" component={AddPlantScreen} options={{ title: 'Добави растение' }} />
-        <Stack.Screen name="AddCareData" component={AddCareDataScreen} options={{ title: 'Данни за грижа' }} />
-        <Stack.Screen name="PlantDetails" component={PlantDetailsScreen} options={{ title: 'Детайли' }} />
+    <NavigationContainer theme={navTheme}>
+      <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="Register" component={RegisterScreen} />
+        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="AddPlant" component={AddPlantScreen} />
+        <Stack.Screen name="AddCareData" component={AddCareDataScreen} />
+        <Stack.Screen name="PlantDetails" component={PlantDetailsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

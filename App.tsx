@@ -5,7 +5,7 @@ import { PlantStoreProvider } from './src/data/PlantStore';
 export default function App() {
   return (
     <PlantStoreProvider>
-      <StatusBar style="auto" />
+      <StatusBar style="light" />
       <RootNavigator />
     </PlantStoreProvider>
   );

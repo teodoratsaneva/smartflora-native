@@ -44,7 +44,7 @@ export function AddPlantScreen({ navigation }: Props) {
       idealHumidity: specs?.idealHumidity ?? 50,
       history: [],
     });
-    navigation.replace('PlantDetails', { plantId: id });
+    navigation.goBack();
   }
 
   return (

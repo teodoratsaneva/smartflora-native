@@ -44,7 +44,7 @@ export function PlantDetailsScreen({ route, navigation }: Props) {
   if (!plant) {
     return (
       <View style={styles.container}>
-        <AppHeader />
+        <AppHeader onBack={() => navigation.navigate('Home')} />
         <Text style={styles.emptyText}>Plant not found.</Text>
       </View>
     );
@@ -54,7 +54,7 @@ export function PlantDetailsScreen({ route, navigation }: Props) {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
-      <AppHeader />
+      <AppHeader onBack={() => navigation.navigate('Home')} />
       <View style={styles.body}>
         <Text style={styles.name}>{plant.name}</Text>
 

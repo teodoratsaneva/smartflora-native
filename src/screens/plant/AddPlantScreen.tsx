@@ -49,7 +49,7 @@ export function AddPlantScreen({ navigation }: Props) {
 
   return (
     <View style={styles.container}>
-      <AppHeader />
+      <AppHeader onBack={() => navigation.navigate('Home')} />
       <View style={styles.body}>
         <Text style={styles.pageTitle}>Add New Plant</Text>
 

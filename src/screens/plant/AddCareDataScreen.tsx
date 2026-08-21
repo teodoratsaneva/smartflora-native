@@ -22,7 +22,7 @@ export function AddCareDataScreen({ route, navigation }: Props) {
   if (!plant) {
     return (
       <View style={styles.container}>
-        <AppHeader />
+        <AppHeader onBack={() => navigation.goBack()} />
         <Text style={styles.notFound}>Plant not found.</Text>
       </View>
     );
@@ -45,7 +45,7 @@ export function AddCareDataScreen({ route, navigation }: Props) {
 
   return (
     <View style={styles.container}>
-      <AppHeader />
+      <AppHeader onBack={() => navigation.goBack()} />
       <View style={styles.body}>
         <Text style={styles.plantName}>{plant.name}</Text>
 

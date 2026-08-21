@@ -5,14 +5,22 @@ import { colors } from '../../theme/colors';
 
 type Props = {
   title?: string;
+  onBack?: () => void;
 };
 
-export function AppHeader({ title = 'SmartFlora' }: Props) {
+export function AppHeader({ title = 'SmartFlora', onBack }: Props) {
   const [showInfo, setShowInfo] = useState(false);
 
   return (
     <View style={styles.header}>
-      <Text style={styles.title}>{title}</Text>
+      <View style={styles.leftGroup}>
+        {onBack ? (
+          <Pressable onPress={onBack} hitSlop={10} accessibilityLabel="Go back" style={styles.backButton}>
+            <Ionicons name="chevron-back" size={24} color="#fff" />
+          </Pressable>
+        ) : null}
+        <Text style={styles.title}>{title}</Text>
+      </View>
       <Pressable onPress={() => setShowInfo(true)} hitSlop={10} accessibilityLabel="Help">
         <Ionicons name="information-circle-outline" size={26} color="#fff" />
       </Pressable>
@@ -46,6 +54,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  leftGroup: { flexDirection: 'row', alignItems: 'center', flexShrink: 1 },
+  backButton: { marginRight: 8, marginLeft: -6 },
   title: { color: '#fff', fontSize: 22, fontWeight: '700' },
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', padding: 24 },
   card: { backgroundColor: colors.surfaceElevated, borderRadius: 16, padding: 22 },

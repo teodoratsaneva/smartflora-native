@@ -1,11 +1,32 @@
-import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import {
+  addDoc,
+  arrayUnion,
+  collection,
+  doc,
+  onSnapshot,
+  orderBy,
+  query,
+  updateDoc,
+} from 'firebase/firestore';
+import { db } from '../firebase/config';
+import { useAuth } from '../auth/AuthContext';
 import type { CareRecord, Plant } from '../types/Plant';
+
+type NewPlantInput = {
+  name: string;
+  variety: string;
+  imageUri?: string;
+  idealTemp: number;
+  idealHumidity: number;
+};
 
 type PlantStoreValue = {
   plants: Plant[];
-  getPlant: (id: number) => Plant | undefined;
-  addPlant: (plant: Plant) => void;
-  addCareRecord: (plantId: number, record: CareRecord) => { ok: true } | { ok: false; error: string };
+  loading: boolean;
+  getPlant: (id: string) => Plant | undefined;
+  addPlant: (plant: NewPlantInput) => Promise<string>;
+  addCareRecord: (plantId: string, record: CareRecord) => Promise<{ ok: true } | { ok: false; error: string }>;
 };
 
 const PlantStoreContext = createContext<PlantStoreValue | undefined>(undefined);
@@ -21,25 +42,72 @@ function isSameDay(a: number, b: number) {
 }
 
 export function PlantStoreProvider({ children }: { children: ReactNode }) {
+  const { user } = useAuth();
   const [plants, setPlants] = useState<Plant[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user) {
+      setPlants([]);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    const plantsQuery = query(collection(db, 'users', user.uid, 'plants'), orderBy('createdAt', 'desc'));
+    const unsubscribe = onSnapshot(
+      plantsQuery,
+      (snapshot) => {
+        setPlants(
+          snapshot.docs.map((docSnap) => {
+            const data = docSnap.data();
+            return {
+              id: docSnap.id,
+              name: data.name,
+              variety: data.variety,
+              imageUri: data.imageUri,
+              createdAt: data.createdAt,
+              idealTemp: data.idealTemp,
+              idealHumidity: data.idealHumidity,
+              history: data.history ?? [],
+            } as Plant;
+          })
+        );
+        setLoading(false);
+      },
+      () => setLoading(false)
+    );
+
+    return unsubscribe;
+  }, [user]);
 
   const value = useMemo<PlantStoreValue>(
     () => ({
       plants,
+      loading,
       getPlant: (id) => plants.find((p) => p.id === id),
-      addPlant: (plant) => setPlants((prev) => [...prev, plant]),
-      addCareRecord: (plantId, record) => {
+      addPlant: async (input) => {
+        if (!user) throw new Error('Not signed in');
+        const docRef = await addDoc(collection(db, 'users', user.uid, 'plants'), {
+          ...input,
+          createdAt: Date.now(),
+          history: [],
+        });
+        return docRef.id;
+      },
+      addCareRecord: async (plantId, record) => {
+        if (!user) return { ok: false, error: 'Not signed in.' };
         const plant = plants.find((p) => p.id === plantId);
         if (plant?.history.some((entry) => isSameDay(entry.timestamp, record.timestamp))) {
           return { ok: false, error: 'Already entered the data today!' };
         }
-        setPlants((prev) =>
-          prev.map((p) => (p.id === plantId ? { ...p, history: [...p.history, record] } : p))
-        );
+        await updateDoc(doc(db, 'users', user.uid, 'plants', plantId), {
+          history: arrayUnion(record),
+        });
         return { ok: true };
       },
     }),
-    [plants]
+    [plants, loading, user]
   );
 
   return <PlantStoreContext.Provider value={value}>{children}</PlantStoreContext.Provider>;

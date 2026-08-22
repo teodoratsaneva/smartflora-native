@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -17,6 +17,7 @@ export function AddPlantScreen({ navigation }: Props) {
   const [selectedName, setSelectedName] = useState('');
   const [selectedVariety, setSelectedVariety] = useState('');
   const [photoUri, setPhotoUri] = useState<string | undefined>(undefined);
+  const [submitting, setSubmitting] = useState(false);
 
   const varieties = getVarietiesFor(selectedName);
   const canSave = Boolean(selectedName && selectedVariety && photoUri);
@@ -30,21 +31,24 @@ export function AddPlantScreen({ navigation }: Props) {
     }
   }
 
-  function handleAddPlant() {
+  async function handleAddPlant() {
     if (!canSave) return;
     const specs = getSpecsByVariety(selectedName, selectedVariety);
-    const id = Date.now();
-    addPlant({
-      id,
-      name: selectedName,
-      variety: selectedVariety,
-      imageUri: photoUri,
-      createdAt: Date.now(),
-      idealTemp: specs?.idealTemp ?? 22,
-      idealHumidity: specs?.idealHumidity ?? 50,
-      history: [],
-    });
-    navigation.goBack();
+    setSubmitting(true);
+    try {
+      await addPlant({
+        name: selectedName,
+        variety: selectedVariety,
+        imageUri: photoUri,
+        idealTemp: specs?.idealTemp ?? 22,
+        idealHumidity: specs?.idealHumidity ?? 50,
+      });
+      navigation.goBack();
+    } catch {
+      Alert.alert('Error', 'Could not save the plant. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -100,11 +104,11 @@ export function AddPlantScreen({ navigation }: Props) {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.primaryButton, !canSave && styles.primaryButtonDisabled]}
+          style={[styles.primaryButton, (!canSave || submitting) && styles.primaryButtonDisabled]}
           onPress={handleAddPlant}
-          disabled={!canSave}
+          disabled={!canSave || submitting}
         >
-          <Text style={styles.primaryButtonText}>Add Plant</Text>
+          {submitting ? <ActivityIndicator color="#fff" /> : <Text style={styles.primaryButtonText}>Add Plant</Text>}
         </TouchableOpacity>
       </View>
     </View>

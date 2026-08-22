@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { Ionicons } from '@expo/vector-icons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -18,6 +18,7 @@ export function AddCareDataScreen({ route, navigation }: Props) {
   const [temperature, setTemperature] = useState(22);
   const [soilMoisture, setSoilMoisture] = useState(50);
   const [isWatered, setIsWatered] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   if (!plant) {
     return (
@@ -28,13 +29,15 @@ export function AddCareDataScreen({ route, navigation }: Props) {
     );
   }
 
-  function handleSave() {
-    const result = addCareRecord(plantId, {
+  async function handleSave() {
+    setSubmitting(true);
+    const result = await addCareRecord(plantId, {
       soilHumidity: soilMoisture,
       temperature,
       isWatered,
       timestamp: Date.now(),
     });
+    setSubmitting(false);
     if (!result.ok) {
       Alert.alert('Error', result.error);
       return;
@@ -90,8 +93,8 @@ export function AddCareDataScreen({ route, navigation }: Props) {
             <Text style={styles.checkboxLabel}>Watered Today</Text>
           </Pressable>
 
-          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-            <Text style={styles.saveButtonText}>Save</Text>
+          <TouchableOpacity style={styles.saveButton} onPress={handleSave} disabled={submitting}>
+            {submitting ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveButtonText}>Save</Text>}
           </TouchableOpacity>
         </View>
       </View>

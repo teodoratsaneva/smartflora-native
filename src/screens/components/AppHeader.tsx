@@ -6,9 +6,10 @@ import { colors } from '../../theme/colors';
 type Props = {
   title?: string;
   onBack?: () => void;
+  onLogout?: () => void;
 };
 
-export function AppHeader({ title = 'SmartFlora', onBack }: Props) {
+export function AppHeader({ title = 'SmartFlora', onBack, onLogout }: Props) {
   const [showInfo, setShowInfo] = useState(false);
 
   return (
@@ -21,9 +22,16 @@ export function AppHeader({ title = 'SmartFlora', onBack }: Props) {
         ) : null}
         <Text style={styles.title}>{title}</Text>
       </View>
-      <Pressable onPress={() => setShowInfo(true)} hitSlop={10} accessibilityLabel="Help">
-        <Ionicons name="information-circle-outline" size={26} color="#fff" />
-      </Pressable>
+      <View style={styles.rightGroup}>
+        {onLogout ? (
+          <Pressable onPress={onLogout} hitSlop={10} accessibilityLabel="Log out">
+            <Ionicons name="log-out-outline" size={24} color="#fff" />
+          </Pressable>
+        ) : null}
+        <Pressable onPress={() => setShowInfo(true)} hitSlop={10} accessibilityLabel="Help">
+          <Ionicons name="information-circle-outline" size={26} color="#fff" />
+        </Pressable>
+      </View>
 
       <Modal visible={showInfo} transparent animationType="fade" onRequestClose={() => setShowInfo(false)}>
         <Pressable style={styles.overlay} onPress={() => setShowInfo(false)}>
@@ -56,6 +64,7 @@ const styles = StyleSheet.create({
   },
   leftGroup: { flexDirection: 'row', alignItems: 'center', flexShrink: 1 },
   backButton: { marginRight: 8, marginLeft: -6 },
+  rightGroup: { flexDirection: 'row', alignItems: 'center', gap: 16 },
   title: { color: '#fff', fontSize: 22, fontWeight: '700' },
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', padding: 24 },
   card: { backgroundColor: colors.surfaceElevated, borderRadius: 16, padding: 22 },

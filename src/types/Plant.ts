@@ -6,7 +6,7 @@ export type CareRecord = {
 };
 
 export type Plant = {
-  id: number;
+  id: string;
   name: string;
   variety: string;
   imageUri?: string;

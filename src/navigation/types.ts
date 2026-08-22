@@ -3,6 +3,6 @@ export type RootStackParamList = {
   Register: undefined;
   Home: undefined;
   AddPlant: undefined;
-  AddCareData: { plantId: number };
-  PlantDetails: { plantId: number };
+  AddCareData: { plantId: string };
+  PlantDetails: { plantId: string };
 };

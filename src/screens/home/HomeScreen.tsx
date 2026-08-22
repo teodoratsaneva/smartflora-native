@@ -1,8 +1,9 @@
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/types';
 import { usePlantStore } from '../../data/PlantStore';
+import { useAuth } from '../../auth/AuthContext';
 import { PlantCard } from './PlantCard';
 import { AppHeader } from '../components/AppHeader';
 import { colors } from '../../theme/colors';
@@ -10,14 +11,19 @@ import { colors } from '../../theme/colors';
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 export function HomeScreen({ navigation }: Props) {
-  const { plants } = usePlantStore();
+  const { plants, loading } = usePlantStore();
+  const { signOutUser } = useAuth();
 
   return (
     <View style={styles.container}>
-      <AppHeader />
+      <AppHeader onLogout={signOutUser} />
       <Text style={styles.pageTitle}>My Plants</Text>
 
-      {plants.length === 0 ? (
+      {loading ? (
+        <View style={styles.empty}>
+          <ActivityIndicator size="large" color={colors.primary} />
+        </View>
+      ) : plants.length === 0 ? (
         <View style={styles.empty}>
           <Ionicons name="leaf-outline" size={48} color={colors.textFaint} />
           <Text style={styles.emptyTitle}>No plants yet</Text>

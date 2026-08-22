@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/types';
+import { useAuth } from '../../auth/AuthContext';
 import { colors } from '../../theme/colors';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Register'>;
@@ -11,12 +12,14 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
 
 export function RegisterScreen({ navigation }: Props) {
+  const { signUp } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  function handleSignUp() {
+  async function handleSignUp() {
     if (!emailRegex.test(email)) {
       Alert.alert('Error', 'Invalid email format!');
       return;
@@ -29,7 +32,12 @@ export function RegisterScreen({ navigation }: Props) {
       Alert.alert('Error', 'Passwords do not match.');
       return;
     }
-    navigation.replace('Home');
+    setSubmitting(true);
+    const result = await signUp(email.trim(), password);
+    setSubmitting(false);
+    if (!result.ok) {
+      Alert.alert('Error', result.error);
+    }
   }
 
   return (
@@ -80,8 +88,8 @@ export function RegisterScreen({ navigation }: Props) {
         />
       </View>
 
-      <TouchableOpacity style={styles.primaryButton} onPress={handleSignUp}>
-        <Text style={styles.primaryButtonText}>Sign Up</Text>
+      <TouchableOpacity style={styles.primaryButton} onPress={handleSignUp} disabled={submitting}>
+        {submitting ? <ActivityIndicator color="#fff" /> : <Text style={styles.primaryButtonText}>Sign Up</Text>}
       </TouchableOpacity>
 
       <View style={styles.signUpRow}>

@@ -1,18 +1,45 @@
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/types';
+import { useAuth } from '../../auth/AuthContext';
 import { colors } from '../../theme/colors';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
 export function LoginScreen({ navigation }: Props) {
+  const { signIn, resetPassword } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [forgotMode, setForgotMode] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  async function handleLogin() {
+    if (!email || !password) {
+      Alert.alert('Error', 'Please enter your email and password.');
+      return;
+    }
+    setSubmitting(true);
+    const result = await signIn(email.trim(), password);
+    setSubmitting(false);
+    if (!result.ok) {
+      Alert.alert('Error', result.error);
+    }
+  }
+
+  async function handleResetPassword() {
+    if (!resetEmail) return;
+    const result = await resetPassword(resetEmail.trim());
+    if (result.ok) {
+      Alert.alert('Success', 'Password reset email sent.');
+      setForgotMode(false);
+    } else {
+      Alert.alert('Error', result.error);
+    }
+  }
 
   return (
     <View style={styles.container}>
@@ -50,8 +77,8 @@ export function LoginScreen({ navigation }: Props) {
         </Pressable>
       </View>
 
-      <TouchableOpacity style={styles.primaryButton} onPress={() => navigation.replace('Home')}>
-        <Text style={styles.primaryButtonText}>Log In</Text>
+      <TouchableOpacity style={styles.primaryButton} onPress={handleLogin} disabled={submitting}>
+        {submitting ? <ActivityIndicator color="#fff" /> : <Text style={styles.primaryButtonText}>Log In</Text>}
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => setForgotMode((v) => !v)}>
@@ -69,7 +96,7 @@ export function LoginScreen({ navigation }: Props) {
             value={resetEmail}
             onChangeText={setResetEmail}
           />
-          <TouchableOpacity style={styles.forgotButton} onPress={() => setForgotMode(false)}>
+          <TouchableOpacity style={styles.forgotButton} onPress={handleResetPassword}>
             <Text style={styles.forgotButtonText}>Send reset link</Text>
           </TouchableOpacity>
         </View>
